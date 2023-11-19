@@ -1,0 +1,15 @@
+span[current="true"] {
+  background-color: #ff0;
+  color: lime;
+  border-radius: 3px;
+  padding: 2px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+}
+
+span[spoken] {
+  opacity: 1;
+}
+
+span:not([spoken]) {
+  opacity: 0;
+}
