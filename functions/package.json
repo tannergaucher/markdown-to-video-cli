@@ -1,15 +1,15 @@
 {
-  "name": "md-to-video-convertor",
+  "name": "functions",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "vite",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "vite": "^5.0.0"
+    "@google-cloud/speech": "^6.1.0",
+    "@google-cloud/text-to-speech": "^5.0.1"
   }
 }
