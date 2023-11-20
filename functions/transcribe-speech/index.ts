@@ -21,7 +21,6 @@ export async function transcribeSpeech({ gcsUri, client }: TranscribeSpeech) {
     config: config,
   };
 
-  // Detects speech in the audio file
   const [response] = await client.recognize(request);
 
   if (!response.results) {
