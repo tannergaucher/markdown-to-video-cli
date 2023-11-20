@@ -1,11 +1,20 @@
 import puppeteer from "puppeteer";
 import ffmpeg from "fluent-ffmpeg";
 import { Readable } from "stream";
+import { google } from "@google-cloud/speech/build/protos/protos";
 
-export async function recordVideo(url: string) {
+type RecordVideoParams = {
+  pageUrl: string;
+  transcription: google.cloud.speech.v1.ISpeechRecognitionResult;
+};
+
+export async function recordVideo({
+  pageUrl,
+  transcription,
+}: RecordVideoParams) {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
-  await page.goto(url);
+  await page.goto(pageUrl);
   const audio = (await page.waitForSelector(
     "#audio-script"
   )) as HTMLAudioElement | null;
@@ -22,7 +31,7 @@ export async function recordVideo(url: string) {
     await session.send("Page.stopScreencast");
     await browser.close();
 
-    await convertBase64ToMP4(frames, url);
+    await convertBase64ToMP4(frames, pageUrl);
   });
 
   await page.evaluate(async () => {
@@ -33,10 +42,17 @@ export async function recordVideo(url: string) {
       quality: 100,
     });
 
+    console.log("Recording started");
+    console.log(transcription, "transcription");
+
     session.on("Page.screencastFrame", async (event) => {
       frames.push(event.data);
     });
   });
+
+  return {
+    videoUrl: pageUrl,
+  };
 }
 
 async function convertBase64ToMP4(

@@ -10,13 +10,17 @@ import { SpeechClient } from "@google-cloud/speech";
 
 import { textToSpeech } from "./functions/text-to-speech";
 import { transcribeSpeech } from "./functions/transcribe-speech";
-// import { CLIENT_URL } from "./constants";
+import { recordVideo } from "./functions/record-video";
+
+import { CLIENT_URL } from "./constants";
 
 const markdownFile = await $`cat ./content/my-post.md`;
 
 const markdown = markdownFile.stdout.toString();
 
-// const html = await $`echo ${markdown} | marked`;
+const html = await $`echo ${markdown} | marked`;
+
+console.log(html);
 
 async function markdownToPlainText(markdown: string) {
   const result = await remark().use(strip).process(markdown);
@@ -35,8 +39,9 @@ const { transcription } = await transcribeSpeech({
   gcsUri,
 });
 
-// Render the DOM using puppeteer
+const { videoUrl } = await recordVideo({
+  pageUrl: CLIENT_URL,
+  transcription,
+});
 
-// Record video using puppeteer-recorder
-
-// And stitch audio / video with ffmpeg
+console.log("video created at", videoUrl);
