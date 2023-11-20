@@ -1,15 +1,24 @@
 {
-  "name": "md-to-video-convertor",
+  "name": "scriptr",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
+    "start": "zx ./cli.ts",
     "dev": "vite",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "vite": "^5.0.0"
+    "@google-cloud/speech": "^6.1.0",
+    "@google-cloud/text-to-speech": "^5.0.1",
+    "@puppeteer/replay": "^2.13.4",
+    "fluent-ffmpeg": "^2.1.2",
+    "marked": "^10.0.0",
+    "puppeteer": "^21.5.2",
+    "remark": "^15.0.1",
+    "strip-markdown": "^6.0.0",
+    "vite": "^5.0.0",
+    "zx": "^4.3.0"
   }
 }

@@ -67,13 +67,14 @@ audio.addEventListener("pause", () => {
 });
 
 function renderMovie(script: FourNobleTruths) {
-  const movie = document.querySelector("#movie-container") as HTMLDivElement;
+  const movie = document.querySelector(
+    "#movie-container"
+  ) as HTMLDivElement | null;
 
   if (!movie) {
     throw new Error("No movie element found");
   }
 
-  // We want to wrap each word in a span so we can highlight it
   function wrapWordsInSpans(text: string) {
     return text.split(" ").map((word) => {
       const span = document.createElement("span");
@@ -93,21 +94,18 @@ function renderMovie(script: FourNobleTruths) {
     });
   }
 
-  // render the title to the DOM
+  // Extract to function, handle arbitrary script
   const title = document.createElement("h1");
   title.textContent = script.title;
   movie.appendChild(title);
 
-  // render the intro to the DOM
   const intro = document.createElement("p");
   appendSpansToContainer(intro, wrapWordsInSpans(script.intro));
   movie.appendChild(intro);
 
-  // render the four truths to the DOM
   const truths = document.createElement("ol");
   movie.appendChild(truths);
 
-  // render the first truth to the DOM
   const firstTruth = document.createElement("li");
   truths.appendChild(firstTruth);
 
@@ -122,7 +120,6 @@ function renderMovie(script: FourNobleTruths) {
   appendSpansToContainer(firstTruthText, wrapWordsInSpans(script.dukkha.text));
   firstTruth.appendChild(firstTruthText);
 
-  // render the second truth to the DOM
   const secondTruth = document.createElement("li");
   truths.appendChild(secondTruth);
 
@@ -135,7 +132,6 @@ function renderMovie(script: FourNobleTruths) {
   secondTruth.appendChild(secondTruthTitle);
   secondTruth.appendChild(secondTruthText);
 
-  // render the third truth to the DOM
   const thirdTruth = document.createElement("li");
   truths.appendChild(thirdTruth);
 
@@ -150,7 +146,6 @@ function renderMovie(script: FourNobleTruths) {
   appendSpansToContainer(thirdTruthText, wrapWordsInSpans(script.noridha.text));
   thirdTruth.appendChild(thirdTruthText);
 
-  // render the fourth truth to the DOM
   const fourthTruth = document.createElement("li");
   truths.appendChild(fourthTruth);
 

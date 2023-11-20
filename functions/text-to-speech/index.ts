@@ -1,27 +1,20 @@
-// Imports the Google Cloud client library
-import * as textToSpeech from "@google-cloud/text-to-speech";
+import * as TextToSpeech from "@google-cloud/text-to-speech";
 import { google } from "@google-cloud/text-to-speech/build/protos/protos";
 
-// Import other required libraries
 import * as fs from "fs";
 import * as util from "util";
 
-// Create a client
-// const client = new textToSpeech.TextToSpeechClient();
-
-interface CreateVideoSpeechParams {
-  client: textToSpeech.TextToSpeechClient;
-  textFilePath: string;
+interface TextToSpeechParams {
+  client: TextToSpeech.TextToSpeechClient;
+  text: string;
 }
 
-export async function createVideoSpeech({
+export async function textToSpeech({
   client,
-  textFilePath,
-}: CreateVideoSpeechParams): Promise<{
+  text,
+}: TextToSpeechParams): Promise<{
   gcsUri: string;
 }> {
-  const text = fs.readFileSync(textFilePath, "utf8");
-
   const request = {
     input: { text },
     voice: {
