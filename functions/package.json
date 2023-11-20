@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "@google-cloud/speech": "^6.1.0",
-    "@google-cloud/text-to-speech": "^5.0.1"
+    "@google-cloud/text-to-speech": "^5.0.1",
+    "puppeteer-screen-recorder": "^2.1.2"
   }
 }
