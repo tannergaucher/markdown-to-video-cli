@@ -6,34 +6,36 @@ export async function recordVideo(url: string) {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
   await page.goto(url);
-  await page.waitForSelector("#audio-script");
+  const audio = (await page.waitForSelector(
+    "#audio-script"
+  )) as HTMLAudioElement | null;
+
+  if (!audio) {
+    throw new Error("Audio not found");
+  }
+
+  const session = await page.target().createCDPSession();
+
+  const frames: string[] = [];
+
+  audio.addEventListener("ended", async () => {
+    await session.send("Page.stopScreencast");
+    await browser.close();
+
+    await convertBase64ToMP4(frames, url);
+  });
 
   await page.evaluate(async () => {
-    const audio = document.getElementById("audio-script") as HTMLAudioElement;
-
     audio.play();
-
-    const session = await page.target().createCDPSession();
-
-    const frames: string[] = [];
-
-    session.on("Page.screencastFrame", async (event) => {
-      frames.push(event.data);
-      event.data;
-    });
 
     await session.send("Page.startScreencast", {
       format: "png",
       quality: 100,
     });
 
-    // Do DOM manipulation here
-
-    await session.send("Page.stopScreencast");
-
-    await browser.close();
-
-    await convertBase64ToMP4(frames, url);
+    session.on("Page.screencastFrame", async (event) => {
+      frames.push(event.data);
+    });
   });
 }
 
