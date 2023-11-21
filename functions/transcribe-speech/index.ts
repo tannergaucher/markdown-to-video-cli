@@ -1,5 +1,4 @@
 import * as CloudSpeech from "@google-cloud/speech";
-import { google } from "@google-cloud/speech/build/protos/protos";
 
 type TranscribeSpeech = {
   gcsUri: string;
@@ -11,7 +10,9 @@ export async function transcribeSpeech({ gcsUri, client }: TranscribeSpeech) {
     uri: gcsUri,
   };
   const config = {
-    encoding: google.cloud.speech.v1.RecognitionConfig.AudioEncoding.MP3,
+    encoding:
+      CloudSpeech.protos.google.cloud.speech.v1.RecognitionConfig.AudioEncoding
+        .LINEAR16,
     sampleRateHertz: 16000,
     languageCode: "en-US",
   };
@@ -23,9 +24,9 @@ export async function transcribeSpeech({ gcsUri, client }: TranscribeSpeech) {
 
   const [response] = await client.recognize(request);
 
-  if (!response.results) {
-    throw new Error("No results");
+  if (response?.results?.[0]) {
+    return { transcription: response.results[0] };
   }
 
-  return { transcription: response.results[0] };
+  throw new Error("No response");
 }

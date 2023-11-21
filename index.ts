@@ -1,5 +1,5 @@
-import { transcription } from "./transcription";
-import { FourNobleTruths, script } from "./script";
+import { transcription } from "./transcription.js";
+import { FourNobleTruths, script } from "./script.js";
 
 const audio = document.querySelector("audio");
 
@@ -7,20 +7,24 @@ if (!audio) {
   throw new Error("Audio source not found");
 }
 
-const words = transcription.results[0].alternatives[0].words;
+const transcriptionWords = transcription?.results[0]?.alternatives[0]?.words;
+
+if (!transcriptionWords?.length) {
+  throw new Error("No transcription words found");
+}
 
 let currentWordIndex = 0;
 
-let interval;
+let interval: any;
 
 renderMovie(script);
 
 audio.addEventListener("play", () => {
   interval = setInterval(() => {
     const currentTime = audio.currentTime;
-    const currentWord = words[currentWordIndex];
+    const currentWord = transcriptionWords[currentWordIndex];
 
-    console.log(currentTime, currentWord);
+    if (!currentWord) return;
 
     if (currentTime >= parseInt(currentWord.startTime)) {
       highlightWord(currentWordIndex);
@@ -30,7 +34,7 @@ audio.addEventListener("play", () => {
       currentWordIndex++;
     }
 
-    if (currentWordIndex >= words.length) {
+    if (currentWordIndex >= transcriptionWords.length) {
       clearInterval(interval);
     }
   }, 50);

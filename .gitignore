@@ -1,1 +1,4 @@
 node_modules
+dist
+service-account.json
+output.mp3

@@ -1,11 +1,11 @@
 import puppeteer from "puppeteer";
 import ffmpeg from "fluent-ffmpeg";
 import { Readable } from "stream";
-import { google } from "@google-cloud/speech/build/protos/protos";
+import * as CloudSpeech from "@google-cloud/speech";
 
 type RecordVideoParams = {
   pageUrl: string;
-  transcription: google.cloud.speech.v1.ISpeechRecognitionResult;
+  transcription: CloudSpeech.protos.google.cloud.speech.v1.ISpeechRecognitionResult;
 };
 
 export async function recordVideo({
@@ -15,9 +15,8 @@ export async function recordVideo({
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
   await page.goto(pageUrl);
-  const audio = (await page.waitForSelector(
-    "#audio-script"
-  )) as HTMLAudioElement | null;
+
+  const audio = await page.waitForSelector("#audio-script");
 
   if (!audio) {
     throw new Error("Audio not found");
@@ -27,14 +26,14 @@ export async function recordVideo({
 
   const frames: string[] = [];
 
-  audio.addEventListener("ended", async () => {
-    await session.send("Page.stopScreencast");
-    await browser.close();
+  const audioHandle = await page.waitForSelector("#audio-script");
 
-    await convertBase64ToMP4(frames, pageUrl);
-  });
+  if (!audioHandle) {
+    throw new Error("Audio not found");
+  }
 
-  await page.evaluate(async () => {
+  await audioHandle.evaluate(async (audioElement: Element) => {
+    const audio = audioElement as HTMLAudioElement;
     audio.play();
 
     await session.send("Page.startScreencast", {
@@ -43,10 +42,16 @@ export async function recordVideo({
     });
 
     console.log("Recording started");
-    console.log(transcription, "transcription");
+    console.log("Do things with the transcription / DOM here", transcription);
 
     session.on("Page.screencastFrame", async (event) => {
       frames.push(event.data);
+    });
+
+    audio.addEventListener("ended", async () => {
+      await session.send("Page.stopScreencast");
+      await browser.close();
+      await convertBase64ToMP4(frames, pageUrl);
     });
   });
 
