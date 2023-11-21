@@ -8,11 +8,11 @@ import strip from "strip-markdown";
 import { TextToSpeechClient } from "@google-cloud/text-to-speech";
 import { SpeechClient } from "@google-cloud/speech";
 
-import { textToSpeech } from "./functions/text-to-speech";
-import { transcribeSpeech } from "./functions/transcribe-speech";
-import { recordVideo } from "./functions/record-video";
+import { textToSpeech } from "./functions/text-to-speech/index.js";
+import { transcribeSpeech } from "./functions/transcribe-speech/index.js";
+import { recordVideo } from "./functions/record-video/index.js";
 
-import { CLIENT_URL } from "./constants";
+import { CLIENT_URL } from "./constants.js";
 
 const markdownFile = await $`cat ./content/my-post.md`;
 

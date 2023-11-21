@@ -1,5 +1,4 @@
 import * as TextToSpeech from "@google-cloud/text-to-speech";
-import { google } from "@google-cloud/text-to-speech/build/protos/protos";
 
 import * as fs from "fs";
 import * as util from "util";
@@ -19,10 +18,12 @@ export async function textToSpeech({
     input: { text },
     voice: {
       languageCode: "en-US",
-      ssmlGender: google.cloud.texttospeech.v1.SsmlVoiceGender.MALE,
+      ssmlGender:
+        TextToSpeech.protos.google.cloud.texttospeech.v1.SsmlVoiceGender.MALE,
     },
     audioConfig: {
-      audioEncoding: google.cloud.texttospeech.v1.AudioEncoding.MP3,
+      audioEncoding:
+        TextToSpeech.protos.google.cloud.texttospeech.v1.AudioEncoding.MP3,
     },
   };
 
