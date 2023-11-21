@@ -1,16 +1,21 @@
 import * as TextToSpeech from "@google-cloud/text-to-speech";
+import { Storage } from "@google-cloud/storage";
 
 import * as fs from "fs";
 import * as util from "util";
 
+import { BUCKET_NAME } from "../../cli.js";
+
 interface TextToSpeechParams {
   client: TextToSpeech.TextToSpeechClient;
+  storage: Storage;
   text: string;
 }
 
 export async function textToSpeech({
-  client,
   text,
+  client,
+  storage,
 }: TextToSpeechParams): Promise<{
   gcsUri: string;
 }> {
@@ -34,11 +39,24 @@ export async function textToSpeech({
   }
 
   const writeFile = util.promisify(fs.writeFile);
-  await writeFile("output.mp3", response.audioContent, "binary");
 
-  console.log("Audio content written to file: output.mp3");
+  const timestamp = new Date().getTime();
+  const filename = `speech-${timestamp}.mp3`;
+
+  await writeFile(filename, response.audioContent, "binary");
+
+  await storage
+    .bucket(BUCKET_NAME)
+    .upload(filename, {
+      destination: filename,
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+
+  console.log(`${filename} uploaded to ${BUCKET_NAME}.`);
 
   return {
-    gcsUri: "example-gcs-uri",
+    gcsUri: `gs://${BUCKET_NAME}/${filename}`,
   };
 }

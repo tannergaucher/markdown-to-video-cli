@@ -1,17 +1,25 @@
 import puppeteer from "puppeteer";
 import ffmpeg from "fluent-ffmpeg";
 import { Readable } from "stream";
-import * as CloudSpeech from "@google-cloud/speech";
+import { Storage } from "@google-cloud/storage";
+
+import { BUCKET_NAME } from "../../cli.js";
 
 type RecordVideoParams = {
   pageUrl: string;
-  transcription: CloudSpeech.protos.google.cloud.speech.v1.ISpeechRecognitionResult;
+  transcriptionUri: string;
+  storage: Storage;
 };
 
 export async function recordVideo({
   pageUrl,
-  transcription,
+  transcriptionUri,
+  storage,
 }: RecordVideoParams) {
+  const fileName = transcriptionUri.split("text-to-speech-responses/")[1] ?? "";
+
+  await storage.bucket(BUCKET_NAME).file(fileName).download();
+
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
   await page.goto(pageUrl);
@@ -21,6 +29,8 @@ export async function recordVideo({
   if (!audio) {
     throw new Error("Audio not found");
   }
+
+  console.log(page);
 
   const session = await page.target().createCDPSession();
 
@@ -42,7 +52,7 @@ export async function recordVideo({
     });
 
     console.log("Recording started");
-    console.log("Do things with the transcription / DOM here", transcription);
+    console.log("Do things with the transcription / DOM here");
 
     session.on("Page.screencastFrame", async (event) => {
       frames.push(event.data);
