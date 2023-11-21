@@ -19,6 +19,7 @@ export async function transcribeSpeech({
   const audio = {
     uri: gcsUri,
   };
+
   const config = {
     encoding:
       CloudSpeech.protos.google.cloud.speech.v1.RecognitionConfig.AudioEncoding

@@ -1,7 +1,12 @@
 import puppeteer from "puppeteer";
-import ffmpeg from "fluent-ffmpeg";
-import { Readable } from "stream";
 import { Storage } from "@google-cloud/storage";
+import { promises as fs } from "fs";
+import { tmpdir } from "os";
+import { join } from "path";
+
+import ffmpeg from "fluent-ffmpeg";
+import { path as ffmpegPath } from "@ffmpeg-installer/ffmpeg";
+ffmpeg.setFfmpegPath(ffmpegPath);
 
 import { BUCKET_NAME } from "../../cli.js";
 
@@ -16,57 +21,56 @@ export async function recordVideo({
   transcriptionUri,
   storage,
 }: RecordVideoParams) {
+  // Get transcription from GCS. Using later to manipulate the DOM.
   const fileName = transcriptionUri.split("text-to-speech-responses/")[1] ?? "";
 
-  await storage.bucket(BUCKET_NAME).file(fileName).download();
+  await storage.bucket(BUCKET_NAME).file(fileName).download({
+    destination: fileName,
+  });
+
+  const videoFileName = fileName.replace(".json", ".mp4");
 
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
-  await page.goto(pageUrl);
-
-  const audio = await page.waitForSelector("#audio-script");
-
-  if (!audio) {
-    throw new Error("Audio not found");
-  }
-
-  console.log(page);
-
-  const session = await page.target().createCDPSession();
 
   const frames: string[] = [];
 
-  const audioHandle = await page.waitForSelector("#audio-script");
+  await page
+    .target()
+    .createCDPSession()
+    .then(async (session) => {
+      console.log("Session created", session);
 
-  if (!audioHandle) {
-    throw new Error("Audio not found");
-  }
+      await page.goto(pageUrl);
 
-  await audioHandle.evaluate(async (audioElement: Element) => {
-    const audio = audioElement as HTMLAudioElement;
-    audio.play();
+      session.on("Page.screencastFrame", async (event) => {
+        frames.push(event.data);
 
-    await session.send("Page.startScreencast", {
-      format: "png",
-      quality: 100,
-    });
+        session.send("Page.screencastFrameAck", {
+          sessionId: event.sessionId,
+        });
+      });
 
-    console.log("Recording started");
-    console.log("Do things with the transcription / DOM here");
+      // Start the screencast
+      await session.send("Page.startScreencast", {
+        format: "jpeg",
+        quality: 100,
+        everyNthFrame: 1,
+      });
 
-    session.on("Page.screencastFrame", async (event) => {
-      frames.push(event.data);
-    });
+      // For now just wait 5 seconds. Update to handle dynamic length
+      await page.waitForTimeout(5000);
 
-    audio.addEventListener("ended", async () => {
       await session.send("Page.stopScreencast");
       await browser.close();
-      await convertBase64ToMP4(frames, pageUrl);
+
+      console.log(`Converting ${frames.length} frames to .mp4`);
+
+      await convertBase64ToMP4(frames, videoFileName);
     });
-  });
 
   return {
-    videoUrl: pageUrl,
+    videoFileName,
   };
 }
 
@@ -74,15 +78,21 @@ async function convertBase64ToMP4(
   base64Images: string[],
   outputFilePath: string
 ) {
-  const imageBuffer = Buffer.from(base64Images.join(""), "base64");
+  // Save each base64 image to a temporary JPEG file
+  const imagePaths = await Promise.all(
+    base64Images.map(async (base64Image, index) => {
+      const imagePath = join(tmpdir(), `image${index}.jpeg`);
+      const imageBuffer = Buffer.from(base64Image, "base64");
+      await fs.writeFile(imagePath, imageBuffer);
+      return imagePath;
+    })
+  );
 
-  const readableImageStream = new Readable();
-  readableImageStream.push(imageBuffer);
-  readableImageStream.push(null);
-
+  // Use FFmpeg to convert the JPEG files into an MP4 video
   const ffmpegProcess = ffmpeg()
-    .input(readableImageStream)
-    .format("mp4")
+    .input("concat:" + imagePaths.join("|"))
+    .inputFormat("image2pipe")
+    .videoCodec("libx264")
     .output(outputFilePath);
 
   await new Promise((resolve, reject) => {
@@ -90,6 +100,9 @@ async function convertBase64ToMP4(
     ffmpegProcess.on("error", reject);
     ffmpegProcess.run();
   });
+
+  // Delete the temporary JPEG files
+  await Promise.all(imagePaths.map((imagePath) => fs.unlink(imagePath)));
 
   console.log(`MP4 file created successfully`);
 }
