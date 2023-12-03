@@ -6,9 +6,9 @@ import * as util from "util";
 import { BUCKET_NAME } from "../../cli.js";
 
 type TranscribeSpeech = {
-  gcsUri: string;
   client: CloudSpeech.SpeechClient;
   storage: Storage;
+  gcsUri: string;
 };
 
 export async function transcribeSpeech({
@@ -29,8 +29,8 @@ export async function transcribeSpeech({
   };
 
   const request = {
-    audio: audio,
-    config: config,
+    audio,
+    config,
   };
 
   const [response] = await client.recognize(request);
@@ -39,9 +39,7 @@ export async function transcribeSpeech({
     throw new Error("No response");
   }
 
-  const timestamp = gcsUri.split("/speech-")[1]?.split(".mp3")[0];
-
-  const filename = `transcription-${timestamp}.json`;
+  const filename = getFilenameFromSpeechUri(gcsUri);
 
   const writeFile = util.promisify(fs.writeFile);
 
@@ -53,10 +51,35 @@ export async function transcribeSpeech({
       destination: filename,
     })
     .catch((err) => {
-      console.log(err, "error uploading file");
+      throw new Error(`Error uploading file ${filename}`, err);
+    })
+    .finally(() => {
+      fs.unlink(filename, (err) => {
+        if (err) {
+          throw new Error(`Error deleting file ${filename}`, err);
+        }
+      });
     });
 
   return {
     transcriptionUri: `gs://${BUCKET_NAME}/${filename}`,
   };
+}
+
+function getFilenameFromSpeechUri(uri: string) {
+  const uriParts = uri.split("/speech-");
+
+  if (uriParts.length < 2) {
+    throw new Error("Invalid URI format");
+  }
+
+  const timestampParts = uriParts[1] ? uriParts[1].split(".mp3") : [];
+
+  if (timestampParts.length < 1) {
+    throw new Error("Invalid timestamp format");
+  }
+  const timestamp = timestampParts[0];
+  const filename = `transcription-${timestamp}.json`;
+
+  return filename;
 }
