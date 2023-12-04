@@ -1,5 +1,6 @@
 import * as CloudSpeech from "@google-cloud/speech";
 import { Storage } from "@google-cloud/storage";
+
 import * as fs from "fs";
 import * as util from "util";
 

@@ -14,14 +14,13 @@ import { markdownToText } from "./functions/markdown-to-text.js";
 
 import { CLIENT_URL } from "./constants.js";
 
-export const BUCKET_NAME = `text-to-speech-responses`;
+export const BUCKET_NAME = `markdown-to-media`;
 
-// Step 1. Read the markdown file and convert to plain text
+// Step 1. Read the markdown file and convert to plain text, create html from markdown and to file
 const markdown = await readMarkdownFromPrompt();
 
 const html = await $`echo ${markdown} | marked`;
 
-// save the html to a file
 await $`echo ${html} > ./generated/index.html`;
 
 console.log(html, "Html created from markdown");
@@ -50,8 +49,8 @@ console.log("Transcription created from speech at", transcriptionUri);
 
 // Step 4. Record the video
 const { videoFileName } = await recordVideo({
+  transcriptionUri,
   pageUrl: CLIENT_URL,
-  transcriptionUri: `gs://text-to-speech-responses/transcription-1700597336059.json`,
   storage: new Storage(),
 });
 
