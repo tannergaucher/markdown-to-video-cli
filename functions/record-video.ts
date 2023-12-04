@@ -8,7 +8,7 @@ import ffmpeg from "fluent-ffmpeg";
 import { path as ffmpegPath } from "@ffmpeg-installer/ffmpeg";
 ffmpeg.setFfmpegPath(ffmpegPath);
 
-import { BUCKET_NAME } from "../../cli.js";
+import { BUCKET_NAME } from "../cli.js";
 
 type RecordVideoParams = {
   pageUrl: string;

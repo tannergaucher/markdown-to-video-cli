@@ -4,7 +4,7 @@ import { Storage } from "@google-cloud/storage";
 import * as fs from "fs";
 import * as util from "util";
 
-import { BUCKET_NAME } from "../../cli.js";
+import { BUCKET_NAME } from "../cli.js";
 
 interface TextToSpeechParams {
   client: TextToSpeech.TextToSpeechClient;
