@@ -1,3 +1,12 @@
 # Markdown to Video CLI
 
-## Create Video Content From Markdown Files using HTML, CSS, and NodeJS / Typescript
+## Create Video Mp4 file from markdown content
+
+## Uses:
+
+- Nodejs
+- Typescript
+- Google Cloud Speech
+- Google Cloud Text to Speech
+- ffmpeg
+- puppeteer
