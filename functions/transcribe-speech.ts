@@ -1,9 +1,10 @@
 import * as CloudSpeech from "@google-cloud/speech";
 import { Storage } from "@google-cloud/storage";
+
 import * as fs from "fs";
 import * as util from "util";
 
-import { BUCKET_NAME } from "../../cli.js";
+import { BUCKET_NAME } from "../cli.js";
 
 type TranscribeSpeech = {
   gcsUri: string;

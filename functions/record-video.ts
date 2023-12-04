@@ -8,7 +8,7 @@ import ffmpeg from "fluent-ffmpeg";
 import { path as ffmpegPath } from "@ffmpeg-installer/ffmpeg";
 ffmpeg.setFfmpegPath(ffmpegPath);
 
-import { BUCKET_NAME } from "../../cli.js";
+import { BUCKET_NAME } from "../cli.js";
 
 type RecordVideoParams = {
   pageUrl: string;
@@ -21,8 +21,9 @@ export async function recordVideo({
   transcriptionUri,
   storage,
 }: RecordVideoParams) {
-  // Get transcription from GCS. Using later to manipulate the DOM.
-  const fileName = transcriptionUri.split("text-to-speech-responses/")[1] ?? "";
+  const fileName = transcriptionUri.split(`${BUCKET_NAME}/`)[1] ?? "";
+
+  console.log(fileName, "filename");
 
   await storage.bucket(BUCKET_NAME).file(fileName).download({
     destination: fileName,

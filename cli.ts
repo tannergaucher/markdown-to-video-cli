@@ -1,58 +1,57 @@
 #!/usr/bin/env zx
 
 import { $ } from "zx";
-import { remark } from "remark";
-import strip from "strip-markdown";
 
 import { TextToSpeechClient } from "@google-cloud/text-to-speech";
 import { SpeechClient } from "@google-cloud/speech";
 import { Storage } from "@google-cloud/storage";
 
-import { textToSpeech } from "./functions/text-to-speech/index.js";
-import { transcribeSpeech } from "./functions/transcribe-speech/index.js";
-import { recordVideo } from "./functions/record-video/index.js";
+import { textToSpeech } from "./functions/text-to-speech.js";
+import { transcribeSpeech } from "./functions/transcribe-speech.js";
+import { recordVideo } from "./functions/record-video.js";
+import { readMarkdownFromPrompt } from "./functions/read-markdown-from-prompt.js";
+import { markdownToText } from "./functions/markdown-to-text.js";
 
 import { CLIENT_URL } from "./constants.js";
 
-export const BUCKET_NAME = `text-to-speech-responses`;
+export const BUCKET_NAME = `markdown-to-media`;
 
-// const markdownFile = await $`cat ./posts/11-20-23.md`;
+// Step 1. Read the markdown file and convert to plain text, create html from markdown and to file
+const markdown = await readMarkdownFromPrompt();
 
-// const markdown = markdownFile.stdout.toString();
+const html = await $`echo ${markdown} | marked`;
 
-// const html = await $`echo ${markdown} | marked`;
+await $`echo ${html} > ./generated/index.html`;
 
-// console.log(html, "html created");
+console.log(html, "Html created from markdown");
 
-// async function markdownToPlainText(markdown: string) {
-//   const result = await remark().use(strip).process(markdown);
-//   return result.toString();
-// }
+const text = await markdownToText(markdown);
 
-// const text = await markdownToPlainText(markdown);
+console.log(text, "Plain text created from markdown");
 
-// console.log(text, "text created");
-
-// const { gcsUri } = await textToSpeech({
-//   text,
-//   client: new TextToSpeechClient(),
-//   storage: new Storage(),
-// });
-
-// console.log("speech file created at", gcsUri);
-
-// const { transcriptionUri } = await transcribeSpeech({
-//   gcsUri,
-//   client: new SpeechClient(),
-//   storage: new Storage(),
-// });
-
-// console.log("transcription created at", transcriptionUri);
-
-const { videoFileName } = await recordVideo({
-  pageUrl: CLIENT_URL,
-  transcriptionUri: `gs://text-to-speech-responses/transcription-1700597336059.json`,
+// Step 2. Convert the text to speech
+const { gcsUri } = await textToSpeech({
+  text,
+  client: new TextToSpeechClient(),
   storage: new Storage(),
 });
 
-console.log(`video created at ${videoFileName}`);
+console.log("Speech created created from text at", gcsUri);
+
+// Step 3. Transcribe the speech
+const { transcriptionUri } = await transcribeSpeech({
+  gcsUri,
+  client: new SpeechClient(),
+  storage: new Storage(),
+});
+
+console.log("Transcription created from speech at", transcriptionUri);
+
+// Step 4. Record the video
+const { videoFileName } = await recordVideo({
+  transcriptionUri,
+  pageUrl: CLIENT_URL,
+  storage: new Storage(),
+});
+
+console.log(`Video created from transcription at ${videoFileName}`);
