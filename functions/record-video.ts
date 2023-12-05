@@ -18,8 +18,6 @@ export async function recordVideo({
 }: RecordVideo) {
   const fileName = transcriptionUri.split(`${bucket}/`)[1] ?? "";
 
-  console.log(fileName, "filename");
-
   await storage.bucket(bucket).file(fileName).download({
     destination: fileName,
   });

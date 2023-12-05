@@ -22,7 +22,7 @@ Maybe my man at National Grid has a point.
 
 > ![A Schvitz on Every Block Screenshot](./a-schvitz-on-every-block.jpg)
 >
-> -- https://groups.jewishgen.org/g/main/topic/the_yiddish_word_schvitz/70414493?p=
+> --- https://groups.jewishgen.org/g/main/topic/the_yiddish_word_schvitz/70414493?p=
 
 ## Gyms and Health as a Communal Space
 

@@ -1,0 +1,32 @@
+[
+  {
+    "alternatives": [
+      {
+        "words": [],
+        "transcript": "goodbye Thelma One Gym in South Williamsburg back in October I spent company Dominic anyways as I was getting ready to hang up and call back to find out if you could tell me something of course I replied and I replied the bike maybe my man at National Grid has a point.",
+        "confidence": 0.8909562826156616
+      }
+    ],
+    "channelTag": 0,
+    "resultEndTime": {
+      "seconds": "59",
+      "nanos": 970000000
+    },
+    "languageCode": "en-us"
+  },
+  {
+    "alternatives": [
+      {
+        "words": [],
+        "transcript": " Underscore underscore 1493 Eagle gyms in health as a communal space making friends in the neighborhood has changed",
+        "confidence": 0.9055736064910889
+      }
+    ],
+    "channelTag": 0,
+    "resultEndTime": {
+      "seconds": "82",
+      "nanos": 900000000
+    },
+    "languageCode": "en-us"
+  }
+]
