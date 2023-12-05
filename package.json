@@ -14,7 +14,7 @@
   },
   "scripts": {
     "dev": "node --no-warnings --enable-source-maps --loader ts-node/esm cli.ts",
-    "dev:client": "vite",
+    "dev:client": "vite content.html",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc"
   },

@@ -57,7 +57,7 @@ const markdown = await readMarkdownFromPrompt();
 
 const html = await $`echo ${markdown} | marked`;
 
-await $`echo ${html} > ./generated/index.html`;
+await $`echo ${html} > ./generated/content.html`;
 
 console.log(html, "Html created from markdown");
 
