@@ -1,34 +1,27 @@
-import * as TextToSpeech from "@google-cloud/text-to-speech";
-import { Storage } from "@google-cloud/storage";
+import * as TextToSpeechEnum from "@google-cloud/text-to-speech";
 
 import * as fs from "fs";
 import * as util from "util";
 
-import { BUCKET_NAME } from "../cli.js";
-
-interface TextToSpeechParams {
-  client: TextToSpeech.TextToSpeechClient;
-  storage: Storage;
-  text: string;
-}
+import { type TextToSpeech } from "../cli.js";
 
 export async function textToSpeech({
+  bucket,
   text,
   client,
   storage,
-}: TextToSpeechParams): Promise<{
-  gcsUri: string;
-}> {
+}: TextToSpeech) {
   const request = {
     input: { text },
     voice: {
       languageCode: "en-US",
       ssmlGender:
-        TextToSpeech.protos.google.cloud.texttospeech.v1.SsmlVoiceGender.MALE,
+        TextToSpeechEnum.protos.google.cloud.texttospeech.v1.SsmlVoiceGender
+          .MALE,
     },
     audioConfig: {
       audioEncoding:
-        TextToSpeech.protos.google.cloud.texttospeech.v1.AudioEncoding.MP3,
+        TextToSpeechEnum.protos.google.cloud.texttospeech.v1.AudioEncoding.MP3,
     },
   };
 
@@ -46,7 +39,7 @@ export async function textToSpeech({
   await writeFile(filename, response.audioContent, "binary");
 
   await storage
-    .bucket(BUCKET_NAME)
+    .bucket(bucket)
     .upload(filename, {
       destination: filename,
     })
@@ -54,9 +47,9 @@ export async function textToSpeech({
       console.log(err);
     });
 
-  console.log(`${filename} uploaded to ${BUCKET_NAME}.`);
+  console.log(`${filename} uploaded to ${bucket}.`);
 
   return {
-    gcsUri: `gs://${BUCKET_NAME}/${filename}`,
+    speechGcsUri: `gs://${bucket}/${filename}`,
   };
 }

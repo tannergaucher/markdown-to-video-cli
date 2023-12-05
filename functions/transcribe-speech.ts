@@ -1,20 +1,14 @@
-import * as CloudSpeech from "@google-cloud/speech";
-import { Storage } from "@google-cloud/storage";
+import * as CloudSpeechEnum from "@google-cloud/speech";
 
 import * as fs from "fs";
 import * as util from "util";
 
-import { BUCKET_NAME } from "../cli.js";
-
-type TranscribeSpeech = {
-  gcsUri: string;
-  client: CloudSpeech.SpeechClient;
-  storage: Storage;
-};
+import { TranscribeSpeech } from "../cli.js";
 
 export async function transcribeSpeech({
   gcsUri,
   client,
+  bucket,
   storage,
 }: TranscribeSpeech) {
   const audio = {
@@ -23,8 +17,8 @@ export async function transcribeSpeech({
 
   const config = {
     encoding:
-      CloudSpeech.protos.google.cloud.speech.v1.RecognitionConfig.AudioEncoding
-        .MP3,
+      CloudSpeechEnum.protos.google.cloud.speech.v1.RecognitionConfig
+        .AudioEncoding.MP3,
     sampleRateHertz: 16000,
     languageCode: "en-US",
   };
@@ -49,7 +43,7 @@ export async function transcribeSpeech({
   await writeFile(filename, response.results.toString());
 
   await storage
-    .bucket(BUCKET_NAME)
+    .bucket(bucket)
     .upload(filename, {
       destination: filename,
     })
@@ -58,6 +52,6 @@ export async function transcribeSpeech({
     });
 
   return {
-    transcriptionUri: `gs://${BUCKET_NAME}/${filename}`,
+    transcriptionUri: `gs://${bucket}/${filename}`,
   };
 }

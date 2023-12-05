@@ -1,31 +1,26 @@
 import puppeteer from "puppeteer";
-import { Storage } from "@google-cloud/storage";
 import { promises as fs } from "fs";
 import { tmpdir } from "os";
 import { join } from "path";
 
 import ffmpeg from "fluent-ffmpeg";
 import { path as ffmpegPath } from "@ffmpeg-installer/ffmpeg";
+
+import { type RecordVideo } from "../cli.js";
+
 ffmpeg.setFfmpegPath(ffmpegPath);
-
-import { BUCKET_NAME } from "../cli.js";
-
-type RecordVideoParams = {
-  pageUrl: string;
-  transcriptionUri: string;
-  storage: Storage;
-};
 
 export async function recordVideo({
   pageUrl,
   transcriptionUri,
+  bucket,
   storage,
-}: RecordVideoParams) {
-  const fileName = transcriptionUri.split(`${BUCKET_NAME}/`)[1] ?? "";
+}: RecordVideo) {
+  const fileName = transcriptionUri.split(`${bucket}/`)[1] ?? "";
 
   console.log(fileName, "filename");
 
-  await storage.bucket(BUCKET_NAME).file(fileName).download({
+  await storage.bucket(bucket).file(fileName).download({
     destination: fileName,
   });
 
