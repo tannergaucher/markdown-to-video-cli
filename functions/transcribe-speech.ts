@@ -40,7 +40,7 @@ export async function transcribeSpeech({
 
   const writeFile = util.promisify(fs.writeFile);
 
-  await writeFile(filename, response.results.toString());
+  await writeFile(filename, JSON.stringify(response.results, null, 2));
 
   await storage
     .bucket(bucket)
