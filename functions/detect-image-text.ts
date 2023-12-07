@@ -1,4 +1,10 @@
-import { type DetectImageText } from "../cli.js";
+import { ImageAnnotatorClient } from "@google-cloud/vision";
+
+interface DetectImageText {
+  bucketName: string;
+  fileName: string;
+  client: ImageAnnotatorClient;
+}
 
 export function detectImageText({
   bucketName,
