@@ -1,6 +1,6 @@
 # Markdown to Video CLI
 
-## Create Video Mp4 file from markdown content
+## Create mp4 videos from markdown files
 
 ## Uses:
 
