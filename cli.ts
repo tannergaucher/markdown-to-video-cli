@@ -59,7 +59,6 @@ const { speechGcsUri } = await textToSpeech({
 console.log("Speech created created from text at", speechGcsUri);
 
 // Step 3. Transcribe the speech file and save to cloud storage
-
 export interface TranscribeSpeech {
   bucket: string;
   gcsUri: string;
@@ -75,20 +74,27 @@ const { transcriptionUri } = await transcribeSpeech({
 
 console.log("Transcription created from speech at", transcriptionUri);
 
-// Step 4. Record the video. Start a chrome devtools protocol session. Screencast while manipulating the dom, and save mp4 to cloud storage
+/* Step 4. Record the video
+- Start a chrome devtools protocol session 
+- Start a screencast in the protocol session
+- Manipululate / animate the dom while the screencast is recording
+- Stop the screencast
+- Take the image frames from the screencast and convert to mp4
+- And save mp4 to cloud storage
+ */
 
 export interface RecordVideo {
+  bucket: string;
+  storage: Storage;
   pageUrl: string;
   transcriptionUri: string;
-  storage: Storage;
-  bucket: string;
 }
 
 const { videoFileName } = await recordVideo({
-  transcriptionUri,
-  pageUrl: CLIENT_URL,
   bucket: BUCKET_NAME,
   storage: new Storage(),
+  pageUrl: CLIENT_URL,
+  transcriptionUri,
 });
 
 console.log(`Video created from transcription at ${videoFileName}`);
